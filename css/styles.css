@@ -56,14 +56,21 @@ article, aside, canvas, details, figcaption, figure, footer, header, hgroup, men
   text-align: center;
   text-transform: uppercase;
 }
-
 .content-container {
   max-width: 1200px;
   padding: 0 15px;
   margin: 0 auto;
-  outline: 1px solid red;
 }
-
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  border: 0;
+}
 /* ====================== Navigation ====================== */
 nav {
   width: 100%;
@@ -174,6 +181,10 @@ nav h1 a {
   margin: 15px 10px 0;
 }
 
+.filter-options select:focus {
+  background-color: #ddd;
+}
+
 @media screen and (min-width: 640px) {
   .filter-options h2 {
     flex: 0 0 auto;
@@ -248,6 +259,12 @@ nav h1 a {
   text-align: center;
   text-decoration: none;
   text-transform: uppercase;
+  transition: .2s;
+}
+
+#restaurants-list li a:focus {
+  background-color: #fff;
+  color: orange;
 }
 
 @media screen and (min-width: 640px) {
