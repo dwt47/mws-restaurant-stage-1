@@ -216,3 +216,10 @@ addMarkersToMap = (restaurants = self.restaurants) => {
   });
 } */
 
+_registerServiceWorker = () => {
+  if (!navigator.serviceWorker) return;
+
+  navigator.serviceWorker.register('/sw.js', { scope: '/' });
+}
+
+_registerServiceWorker();
