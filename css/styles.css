@@ -67,18 +67,22 @@ article, aside, canvas, details, figcaption, figure, footer, header, hgroup, men
 /* ====================== Navigation ====================== */
 nav {
   width: 100%;
-  height: 80px;
+  height: 40px;
   background-color: #252831;
   text-align:center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 nav h1 {
   margin: auto;
+  font-size: 12pt;
+  padding: 0 15px;
 }
 nav h1 a {
   color: #fff;
-  font-size: 14pt;
   font-weight: 200;
-  letter-spacing: 10px;
+  letter-spacing: .3em;
   text-transform: uppercase;
 }
 #breadcrumb {
@@ -113,6 +117,23 @@ nav h1 a {
     color: #01447e;
     text-decoration: underline;
 }
+
+@media screen and (min-width: 400px) {
+  nav h1 {
+    font-size: 16pt;
+  }
+}
+
+@media screen and (min-width: 640px) {
+  nav {
+    height: 80px;
+  }
+
+  nav h1 {
+    font-size: 24pt;
+  }
+}
+
 /* ====================== Map ====================== */
 #map {
   height: 400px;
@@ -120,17 +141,25 @@ nav h1 a {
   background-color: #ccc;
 }
 /* ====================== Restaurant Filtering ====================== */
-.filter-options {
-  width: 100%;
+.blue-background {
   background-color: #3397DB;
+}
+.filter-options {
+  display: flex;
+  flex-flow: row wrap;
   align-items: center;
+  justify-content: center;
+  padding-bottom: 15px;
+  padding-top: 15px;
 }
 .filter-options h2 {
   color: white;
-  font-size: 1rem;
   font-weight: normal;
   line-height: 1;
   margin: 0;
+  flex: 1 0 100%;
+  max-width: 100%;
+  text-align: center;
 }
 .filter-options select {
   background-color: white;
@@ -139,11 +168,21 @@ nav h1 a {
   font-size: 11pt;
   height: 35px;
   letter-spacing: 0;
-  margin: 10px 0;
+  min-width: 200px;
+  max-width: 100%;
   padding: 0 10px;
+  margin: 15px 10px 0;
 }
-.filter-options select + select {
-  margin-left: 20px;
+
+@media screen and (min-width: 640px) {
+  .filter-options h2 {
+    flex: 0 0 auto;
+  }
+
+  .filter-options select {
+    margin-top: 0;
+    margin-left: 20px;
+  }
 }
 
 /* ====================== Restaurant Listing ====================== */
