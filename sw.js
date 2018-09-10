@@ -2,49 +2,43 @@
 
 const VERSION_NUMBER = 1;
 const cacheName = `restaurants-review-app-v${VERSION_NUMBER}`;
-const imgCacheName = `restaurants-review-app-images-v${VERSION_NUMBER}`;
 
 self.addEventListener('install', function(event) {
   event.waitUntil(
     caches.open(cacheName).then(function(cache) {
       return cache.addAll([
+        '/',
         '/js/dbhelper.js',
         '/js/main.js',
         '/js/restaurant_info.js',
         '/css/styles.css',
         '/data/restaurants.json',
-        '/index.html',
-        '/restaurant.html',
       ]);
     })
   );
 });
 
 self.addEventListener('fetch', function(event) {
-  var requestUrl = new URL(event.request.url);
-
-  if (requestUrl.pathname.endsWith('.jpg')) {
-    event.respondWith(servePhoto(event.request, requestUrl));
-    return;
-  }
-
   event.respondWith(
     caches.match(event.request).then(function(response) {
-      return response || fetch(event.request);
+      return response || maybeSaveResponse(event.request);
     })
   );
 });
 
+function maybeSaveResponse(request) {
+  return fetch(request).then(function(networkResponse) {
+    const requestedURL = new URL(request.url);
+    const homeURL = new URL(location);
 
-function servePhoto(request, url) {
-  return caches.open(imgCacheName).then(function(cache) {
-    return cache.match(url).then(function(response) {
-      if (response) return response;
-
-      return fetch(request).then(function(networkResponse) {
-        cache.put(url, networkResponse.clone());
-        return networkResponse;
+    // Save anything we're serving locally; don't cache any external calls
+    if (requestedURL.origin === homeURL.origin) {
+      const clone = networkResponse.clone();
+      caches.open(cacheName).then(function(cache) {
+        cache.put(requestedURL, clone);
       });
-    });
+    }
+
+    return networkResponse;
   });
 }
