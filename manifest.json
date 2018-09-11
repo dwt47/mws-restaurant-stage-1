@@ -1,0 +1,16 @@
+{
+  "short_name": "RR",
+  "name": "Restaurant Reviews",
+  "icons": [
+    {
+      "src": "/images/icon.svg",
+      "type": "image/svg",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#3397DB",
+  "display": "standalone",
+  "scope": "/",
+  "theme_color": "#3397DB"
+}
