@@ -177,5 +177,11 @@ class DBHelper {
     return marker;
   } */
 
+  static setFavorite(restaurantID, favorite) {
+    const url = `${DBHelper.DATABASE_URL}/${restaurantID}/?is_favorite=${favorite ? 'true' : 'false'}`;
+    const method = 'PUT';
+
+    return fetch(url, { method });
+  }
 }
 

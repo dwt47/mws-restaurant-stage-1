@@ -227,6 +227,11 @@ nav h1 a {
   display: flex;
   flex-flow: column;
   padding: 20px 30px;
+  position: relative;
+}
+
+#restaurants-list .restaurant-details h3 {
+  padding-right: 15px;
 }
 
 #restaurants-list .restaurant-img {
@@ -270,6 +275,49 @@ nav h1 a {
 #restaurants-list li a:focus {
   background-color: #fff;
   color: orange;
+}
+
+.restaurant-favorite {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+.star {
+  cursor: pointer;
+  color: orange;
+  display: block;
+  fill: transparent;
+  height: 35px;
+  width: 35px;
+  transition: all .4s ease-in-out;
+  transition-property: fill, transform;
+}
+
+.restaurant-favorite input:focus ~ .star {
+  color: #ad7000;
+}
+
+.restaurant-favorite input:checked ~ .star {
+  fill: orange;
+  transform: rotate(calc(3 * 360deg / 10));
+}
+
+.star svg {
+  display: block;
+  height: 100%;
+  width: 100%;
+}
+
+.restaurant-favorite input[type="checkbox"] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  border: 0;
 }
 
 @media screen and (min-width: 640px) {
@@ -320,6 +368,12 @@ nav h1 a {
   margin: 0 0 30px;
   text-transform: uppercase;
   line-height: 1.1;
+  position: relative;
+  padding-right: 32px;
+}
+#restaurant-name .restaurant-favorite {
+  top: -3px;
+  right: -3px;
 }
 #restaurant-img,
 #restaurant-cuisine {

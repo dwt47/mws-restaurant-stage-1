@@ -1,6 +1,11 @@
 let restaurant;
 var newMap;
 
+const STAR_ICON = `
+<svg xmlns="http://www.w3.org/2000/svg" width="25.6" height="25.6" viewBox="0 0 25.6 25.6">
+  <path xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="2" fill="inherit" d="m 21.392498,8.859725 c .486775,.9154894 -2.880809,5.054688 -2.880809,5.054688 0,0 2.096212,4.907084 1.375952,5.652935 -.720261,.745852 -5.697514,-1.177827 -5.697514,-1.177827 0,0 -4.019148,3.509987 -4.9510673,3.05546 -.9319205,-.454527 -.6404478,-5.782626 -.6404478,-5.782626 0,0 -4.5801825,-2.737793 -4.4358801,-3.764557 .1443025,-1.026765 5.301695,-2.396032 5.301695,-2.396032 0,0 1.1884402,-5.2020358 2.2095432,-5.3820839 1.021104,-.1800487 3.917075,4.3017967 3.917075,4.3017967 0,0 5.314679,-.4772429 5.801453,.4382462 z"/>
+</svg>`;
+
 /**
  * Initialize map as soon as the page is loaded.
  */
@@ -83,6 +88,9 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
   const name = document.getElementById('restaurant-name');
   name.innerHTML = restaurant.name;
 
+  const favorite = createFavoriteToggle(restaurant);
+  name.append(favorite);
+
   const address = document.getElementById('restaurant-address');
   address.innerHTML = restaurant.address;
 
@@ -120,6 +128,35 @@ fillRestaurantHoursHTML = (operatingHours = self.restaurant.operating_hours) => 
 
     hours.appendChild(row);
   }
+}
+
+createFavoriteToggle = (restaurant) => {
+  const checkboxID = `mark-favorite-${restaurant.name}`;
+  const favorite = document.createElement('label');
+  favorite.className = 'restaurant-favorite';
+  favorite.htmlFor = checkboxID;
+
+  const checkbox = document.createElement('input');
+  checkbox.type = 'checkbox';
+  checkbox.id = checkboxID;
+  checkbox.name = checkboxID;
+  checkbox.checked = restaurant.is_favorite === 'true';
+  checkbox.onchange = e => DBHelper.setFavorite(restaurant.id, checkbox.checked);
+  favorite.append(checkbox);
+
+  const text = document.createElement('span');
+  text.className = 'sr-only';
+  text.innerHTML = restaurant.name + ' is a favorite restaurant';
+  favorite.append(text);
+
+  const star = document.createElement('span');
+  star.className = 'star';
+  star.innerHTML = STAR_ICON;
+  star.setAttribute('title', 'Mark as Favorite');
+  star.setAttribute('role', 'img');
+  favorite.append(star);
+
+  return favorite;
 }
 
 /**
