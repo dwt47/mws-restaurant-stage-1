@@ -81,6 +81,23 @@ fetchRestaurantFromURL = (callback) => {
   }
 }
 
+fetchRestaurantReviews = (restaurant = self.restaurant, callback) => {
+  if (self.reviews) { // already got reviews!
+    callback(null, self.reviews);
+    return;
+  }
+
+  if (!restaurant || !restaurant.id) {
+    callback('No id', null);
+  } else {
+    DBHelper.fetchReviewsByRestaurantId(restaurant.id, (e, reviews) => {
+      self.reviews = reviews;
+      callback(e, reviews);
+    });
+  }
+
+}
+
 /**
  * Create restaurant HTML and add it to the webpage
  */
@@ -162,7 +179,14 @@ createFavoriteToggle = (restaurant) => {
 /**
  * Create all reviews HTML and add them to the webpage.
  */
-fillReviewsHTML = (reviews = self.restaurant.reviews) => {
+fillReviewsHTML = (reviews = self.reviews) => {
+  if (!reviews) {
+    return fetchRestaurantReviews(self.restaurant, (e, reviews) => {
+      if (reviews) {
+        return fillReviewsHTML(reviews);
+      }
+    });
+  }
   const container = document.getElementById('reviews-container');
   const title = document.createElement('h2');
   title.innerHTML = 'Reviews';
@@ -195,7 +219,7 @@ createReviewHTML = (review) => {
   details.appendChild(name);
 
   const date = document.createElement('p');
-  date.innerHTML = review.date;
+  date.innerHTML = formatDate(review.createdAt);
   details.appendChild(date);
 
   const rating = document.createElement('p');
@@ -207,6 +231,15 @@ createReviewHTML = (review) => {
   li.appendChild(comments);
 
   return li;
+}
+
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+formatDate = (timestamp) => {
+  const d = new Date(timestamp);
+  const month = MONTHS[d.getMonth()];
+  const day = d.getDate();
+  const year = d.getFullYear();
+  return `${month} ${day}, ${year}`;
 }
 
 /**

@@ -9,7 +9,15 @@ class DBHelper {
    */
   static get DATABASE_URL() {
     const port = 1337; // Change this to your server port
-    return `http://localhost:${port}/restaurants`;
+    return `http://localhost:${port}`;
+  }
+
+  static get RESTAURANTS_URL() {
+    return `${DBHelper.DATABASE_URL}/restaurants`;
+  }
+
+  static get REVIEWS_URL() {
+    return `${DBHelper.DATABASE_URL}/reviews`;
   }
 
   /**
@@ -17,7 +25,7 @@ class DBHelper {
    */
   static fetchRestaurants(callback) {
     if (!this.__RESTAURANT_FETCH__) {
-      this.__RESTAURANT_FETCH__ = fetch(DBHelper.DATABASE_URL)
+      this.__RESTAURANT_FETCH__ = fetch(DBHelper.RESTAURANTS_URL)
         .then(res => {
           this.__RESTAURANT_FETCH__ = false;
           return res.json()
@@ -178,10 +186,42 @@ class DBHelper {
   } */
 
   static setFavorite(restaurantID, favorite) {
-    const url = `${DBHelper.DATABASE_URL}/${restaurantID}/?is_favorite=${favorite ? 'true' : 'false'}`;
+    const url = `${DBHelper.RESTAURANTS_URL}/${restaurantID}/?is_favorite=${favorite ? 'true' : 'false'}`;
     const method = 'PUT';
 
     return fetch(url, { method });
+  }
+
+  /**
+   * Fetch all reviews.
+   */
+  static fetchReviews(callback) {
+    if (!this.__REVIEWS_FETCH__) {
+      this.__REVIEWS_FETCH__ = fetch(DBHelper.REVIEWS_URL)
+        .then(res => {
+          this.__REVIEWS_FETCH__ = false;
+          return res.json()
+        });
+    }
+
+    this.__REVIEWS_FETCH__
+      .then(reviews => callback(null, reviews))
+      .catch(error => callback(error, null));
+  }
+
+  /**
+   * Fetch reviews for a restaurant by its ID.
+   */
+  static fetchReviewsByRestaurantId(id, callback) {
+    // fetch all restaurants with proper error handling.
+    DBHelper.fetchReviews((error, reviews) => {
+      if (error) {
+        callback(error, null);
+      } else {
+        const restaurantReviews = reviews.filter(r => r.restaurant_id == id);
+        callback(null, restaurantReviews);
+      }
+    });
   }
 }
 
