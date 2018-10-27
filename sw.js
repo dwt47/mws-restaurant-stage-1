@@ -69,6 +69,8 @@ function saveRestaurants(restaurants) {
   });
 }
 
+// Attempt to fetch the restaurants from API
+// But if there's an error and we have a backup copy use that instead
 function getRestaurants(url) {
 
   return dbPromise.then(db => {
@@ -76,16 +78,23 @@ function getRestaurants(url) {
     const store = tx.objectStore(idbStoreName);
 
     return store.get('restaurants').then(dbResult => {
-      if (!dbResult) {
-        return fetch(url).then(response => {
-          const clone = response.clone();
-          clone.json().then(saveRestaurants)
+      const fetchPromise = fetch(url).then(response => {
+        const clone = response.clone();
+        clone.json().then(saveRestaurants)
 
-          return response;
-        });
+        return response;
+      });
+
+      // can't do anything if we don't have a db backup
+      if (!dbResult) {
+        return fetchPromise;
       }
 
-      return new Response(JSON.stringify(dbResult));
+      // if we have a backup, use it in case fetch fails
+      return fetchPromise.catch(e => {
+        console.log('Fetch failed: ', e);
+        return new Response(JSON.stringify(dbResult));
+      });
     });
   });
 }
