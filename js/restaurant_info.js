@@ -176,10 +176,87 @@ createFavoriteToggle = (restaurant) => {
   return favorite;
 }
 
+createReviewForm = (restaurant_id) => {
+  const form = document.createElement('form');
+  form.className = 'review-form';
+  form.innerHTML = `
+    <label for="review-form__name">
+      Name:
+      <input type="text" id="review-form__name" name="name" />
+    </label>
+    <fieldset class="review-form__rating">
+      Rating:
+      <label for="review-form__rating--1">
+        1 <input type="radio" id="review-form__rating--1" name="rating" value="1" />
+      </label>
+      <label for="review-form__rating--2">
+        2 <input type="radio" id="review-form__rating--2" name="rating" value="2" />
+      </label>
+      <label for="review-form__rating--3">
+        3 <input type="radio" id="review-form__rating--3" name="rating" value="3" />
+      </label>
+      <label for="review-form__rating--4">
+        4 <input type="radio" id="review-form__rating--4" name="rating" value="4" />
+      </label>
+      <label for="review-form__rating--5">
+        5 <input type="radio" id="review-form__rating--5" name="rating" value="5" />
+      </label>
+    </fieldset>
+    <label for="review-form__comments">
+      Comments: <textarea id="review-form__comments" name="comments"></textarea>
+    </label>
+    <button type="submit">Submit Review</button>
+  `;
+
+  form.addEventListener('submit', onSubmit);
+  function onSubmit(e) {
+    e.preventDefault();
+
+    let data = { restaurant_id };
+
+    let fd = new FormData(form);
+    for (let [k,v] of fd.entries()) {
+      if (k === 'name') {
+        form.querySelector(`[name="name"]`).classList.toggle('error', !v);
+        if (!v) {
+          return false;
+        }
+      } else if (k === 'rating') {
+        form.querySelector('.review-form__rating').classList.toggle('error', !v);
+        if (!v) {
+          return false;
+        }
+      }
+
+      data[k] = v;
+    }
+
+    form.disabled = true;
+    [...form.querySelectorAll('input,textarea,button')].forEach(v => v.disabled = true);
+
+    DBHelper.saveReview(data).then(async res => {
+      const review = await res.json();
+      const ul = document.getElementById('reviews-list');
+      ul.insertBefore(createReviewHTML(review), ul.firstChild);
+    }).catch(() => {
+      data.createdAt = Date.now();
+
+      const ul = document.getElementById('reviews-list');
+      ul.insertBefore(createReviewHTML(data), ul.firstChild);
+    }).finally(() => {
+      form.parentElement.removeChild(form);
+    });
+
+    form.removeEventListener('submit', onSubmit);
+  }
+
+  return form;
+}
+
 /**
  * Create all reviews HTML and add them to the webpage.
  */
-fillReviewsHTML = (reviews = self.reviews) => {
+fillReviewsHTML = (reviews = self.reviews, updateReviewsOnly = false) => {
   if (!reviews) {
     return fetchRestaurantReviews(self.restaurant, (e, reviews) => {
       if (reviews) {
@@ -192,6 +269,19 @@ fillReviewsHTML = (reviews = self.reviews) => {
   title.innerHTML = 'Reviews';
   container.appendChild(title);
 
+  const form = createReviewForm(self.restaurant.id);
+  form.hidden = true;
+  const addYourOwn = document.createElement('button');
+  addYourOwn.innerHTML = 'Add Your Own';
+  addYourOwn.addEventListener('click', e => {
+    form.hidden = false;
+    form.querySelector('input[name=name]').focus();
+    addYourOwn.hidden = true;
+  });
+
+  container.appendChild(addYourOwn);
+  container.appendChild(form);
+
   if (!reviews) {
     const noReviews = document.createElement('p');
     noReviews.innerHTML = 'No reviews yet!';
@@ -199,7 +289,7 @@ fillReviewsHTML = (reviews = self.reviews) => {
     return;
   }
   const ul = document.getElementById('reviews-list');
-  reviews.forEach(review => {
+  reviews.reverse().forEach(review => {
     ul.appendChild(createReviewHTML(review));
   });
   container.appendChild(ul);
@@ -210,6 +300,9 @@ fillReviewsHTML = (reviews = self.reviews) => {
  */
 createReviewHTML = (review) => {
   const li = document.createElement('li');
+
+  if (!review.name) return li;
+
   const details = document.createElement('div');
   details.className = 'review-details';
   li.appendChild(details);

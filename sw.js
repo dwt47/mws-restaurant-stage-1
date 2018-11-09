@@ -23,8 +23,15 @@ self.addEventListener('install', function(event) {
 });
 
 self.addEventListener('fetch', function(event) {
-  if (event.request.url === DBHelper.DATABASE_URL) {
+  if (event.request.method === 'POST') {
+    queueRequest(event.request);
+    return;
+  }
+
+  if (event.request.url === DBHelper.RESTAURANTS_URL) {
     event.respondWith(getRestaurants(event.request.url));
+  } else if (event.request.url.startsWith(DBHelper.REVIEWS_URL)) {
+    event.respondWith(getReviews(event.request.url));
   } else {
     event.respondWith(
       caches.match(event.request).then(function(response) {
@@ -34,6 +41,20 @@ self.addEventListener('fetch', function(event) {
   }
 
 });
+
+let queue = [];
+
+function queueRequest(request) {
+  fetch(request.clone()).catch(e => {
+    queue.push(request.clone());
+  });
+}
+
+setInterval(() => {
+  let _queue = queue;
+  queue = [];
+  _queue.forEach(queueRequest);
+}, 5000);
 
 function maybeSaveResponse(request) {
   return fetch(request).then(function(networkResponse) {
@@ -72,7 +93,6 @@ function saveRestaurants(restaurants) {
 // Attempt to fetch the restaurants from API
 // But if there's an error and we have a backup copy use that instead
 function getRestaurants(url) {
-
   return dbPromise.then(db => {
     const tx = db.transaction(idbStoreName);
     const store = tx.objectStore(idbStoreName);
@@ -81,6 +101,44 @@ function getRestaurants(url) {
       const fetchPromise = fetch(url).then(response => {
         const clone = response.clone();
         clone.json().then(saveRestaurants)
+
+        return response;
+      });
+
+      // can't do anything if we don't have a db backup
+      if (!dbResult) {
+        return fetchPromise;
+      }
+
+      // if we have a backup, use it in case fetch fails
+      return fetchPromise.catch(e => {
+        console.log('Fetch failed: ', e);
+        return new Response(JSON.stringify(dbResult));
+      });
+    });
+  });
+}
+
+function saveReviews(reviews) {
+  return dbPromise.then(db => {
+    const tx = db.transaction(idbStoreName, 'readwrite');
+    tx.objectStore(idbStoreName).put(reviews, 'reviews');
+    return tx.complete;
+  });
+}
+
+// Attempt to fetch the reviews from API
+// But if there's an error and we have a backup copy use that instead
+function getReviews(url) {
+
+  return dbPromise.then(db => {
+    const tx = db.transaction(idbStoreName);
+    const store = tx.objectStore(idbStoreName);
+
+    return store.get('reviews').then(dbResult => {
+      const fetchPromise = fetch(url).then(response => {
+        const clone = response.clone();
+        clone.json().then(saveReviews)
 
         return response;
       });

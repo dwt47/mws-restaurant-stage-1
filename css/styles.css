@@ -422,6 +422,7 @@ nav h1 a {
 }
 .review-details p {
   color: #333;
+  max-width: 33%;
 }
 #reviews-list li {
   background-color: #fff;
@@ -435,6 +436,10 @@ nav h1 a {
 }
 #reviews-list li p {
   padding: 0 20px;
+}
+#reviews-list li p:empty {
+  margin: 0;
+  padding: 0;
 }
 #restaurant-hours td {
   color: #666;
@@ -462,4 +467,20 @@ nav h1 a {
   .inside #footer {
     width: 60%;
   }
+}
+
+.error {
+  outline: 1px solid red;
+}
+
+.review-form {
+  margin: 10px 0;
+}
+
+.review-form fieldset {
+  margin: 10px 0;
+}
+
+.review-form textarea {
+  width: 100%;
 }

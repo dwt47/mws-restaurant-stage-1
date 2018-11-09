@@ -192,12 +192,19 @@ class DBHelper {
     return fetch(url, { method });
   }
 
+  static saveReview(data) {
+    const method = 'POST';
+    const body = JSON.stringify(data);
+
+    return fetch(DBHelper.REVIEWS_URL, { method, body });
+  }
+
   /**
    * Fetch all reviews.
    */
   static fetchReviews(callback) {
     if (!this.__REVIEWS_FETCH__) {
-      this.__REVIEWS_FETCH__ = fetch(DBHelper.REVIEWS_URL)
+      this.__REVIEWS_FETCH__ = fetch(`${DBHelper.REVIEWS_URL}?limit=10000`)
         .then(res => {
           this.__REVIEWS_FETCH__ = false;
           return res.json()
